@@ -1,5 +1,5 @@
 node_modules
 public
-.firebase
 nuxt
+.firebase
 *.log
