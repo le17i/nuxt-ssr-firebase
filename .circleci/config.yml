@@ -5,13 +5,10 @@
 version: 2
 jobs:
   build:
+    working_directory: ~/nuxt-ssr-firebase
     docker:
-      # specify the version you desire here
       - image: circleci/node:8.11.2
-
-    working_directory: ~/le17i/nuxt-ssr-firebase/src
-
     steps:
       - checkout
-      - run: yarn install
-      - run: yarn build
+      - run: cd src && yarn install
+      - run: cd src && yarn build
