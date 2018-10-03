@@ -20,5 +20,8 @@
     "firebase-functions": "^1.0.3",
     "nuxt": "^1.4.0"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "firebase-tools": "^4.2.1"
+  }
 }
