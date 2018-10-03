@@ -7,23 +7,38 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Install firebase tools
-        command: yarn global add firebase-tools
+          name: Install firebase tools
+          command: yarn global add firebase-tools
       - run:
-        name: Install deps from Nuxt project
-        command: cd src && yarn install
+          name: Install deps from Nuxt project
+          command: cd src && yarn install
       - run:
-        name: Install deps from Firebase Functions project
-        command: cd functions && yarn install
+          name: Install deps from Firebase Functions project
+          command: cd functions && yarn install
       - run:
-        name: Build Nuxt project
-        command: cd src && yarn build
+          name: Build Nuxt project
+          command: cd src && yarn build
       - run:
-        name: Create public folder to static files
-        command: mkdir public
+          name: Create public folder to static files
+          command: mkdir public
       - run:
-        name: Copy files from nuxt folder to public folder
-        command: cp -R functions/nuxt/dist/ public
+          name: Copy files from nuxt folder to public folder
+          command: cp -R functions/nuxt/dist/ public
+  
+  deploy:
+    docker:
+      - image: circleci/node:8.11.2
+    steps:
       - run:
-        name: Deploy on firebase
-        command: firebase deploy --token=$FIREBASE_TOKEN
+          name: Deploy on firebase
+          command: firebase deploy --token=$FIREBASE_TOKEN
+
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build
+      - deploy:
+        requires:
+          - build
