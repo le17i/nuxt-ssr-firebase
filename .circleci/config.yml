@@ -24,7 +24,6 @@ jobs:
       - run:
           name: Copy files from nuxt folder to public folder
           command: cp -R functions/nuxt/dist/ public
-  
   deploy:
     docker:
       - image: circleci/node:8.11.2
@@ -32,8 +31,6 @@ jobs:
       - run:
           name: Deploy on firebase
           command: firebase deploy --token=$FIREBASE_TOKEN
-
-
 workflows:
   version: 2
   build_and_deploy:
