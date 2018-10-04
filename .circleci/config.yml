@@ -41,6 +41,8 @@ jobs:
           paths:
             - functions
             - public
+            - .firebaserc
+            - firebase.json
   Deploy on Firebase Functions and Hosting:
     working_directory: ~/nuxt-ssr-firebase
     docker:
