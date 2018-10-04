@@ -6,23 +6,25 @@ defaults: &defaults
     - image: circleci/node:8.11.2
 
 jobs:
-  build:
-    Checkout code and deps:
+  Checkout code and deps:
+    steps:
       - checkout
       - run:
           name: Restore node modules cache from Nuxt project
           command: v1-node_modules-{{ checksum "src/yarn.lock" }}
-       - run:
+      - run:
           name: Restore node modules cache Firebase Functions project
           command: v1-node_modules-{{ checksum "functions/yarn.lock" }}
-    Install deps:
+  Install deps:
+    steps:
       - run:
           name: Install deps from Nuxt project
           command: cd src && yarn install
       - run:
           name: Install deps from Firebase Functions project
           command: cd functions && yarn install
-    Build the projects:
+  Build the projects:
+    steps:
       - run:
           name: Build Nuxt project
           command: cd src && yarn build
@@ -32,7 +34,8 @@ jobs:
       - run:
           name: Copy files from nuxt folder to public folder
           command: cp -R functions/nuxt/dist/ public
-    Deploy on Firebase Functions and Hosting:
+  Deploy on Firebase Functions and Hosting:
+    steps:
       - run:
           name: Deploy on firebase
           command: cd functions && ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
