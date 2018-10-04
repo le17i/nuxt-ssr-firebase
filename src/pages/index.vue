@@ -1,17 +1,23 @@
 <template>
   <ul class="list">
-    <li v-for="todo in todos" :key="todo.id">{{ todo.title }}</li>
+    <li v-for="post in posts" :key="post.id">
+      <a :href="link(post.id)">{{ post.title }}</a>
+    </li>
   </ul>
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
-  async asyncData () {
-    let { data } = await axios.get('https://jsonplaceholder.typicode.com/todos')
-    return { todos: data }
-  }  
+  computed: {
+    posts () {
+      return this.$store.getters.posts
+    }
+  },
+  methods: {
+    link (id) {
+      return `/${id}`
+    }
+  }
 }
 </script>
 

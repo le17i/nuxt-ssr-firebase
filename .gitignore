@@ -1,5 +1,5 @@
-nuxt
-node_modules
-public
-.firebase
+functions/nuxt/
+node_modules/
+public/
+.firebase/
 *.log
