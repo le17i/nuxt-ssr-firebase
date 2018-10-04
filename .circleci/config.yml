@@ -8,9 +8,9 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-node_modules-{{ checksum "src/yarn.lock" }}
+          key: v1-node_modules-{{ checksum "/src/yarn.lock" }}
       - restore_cache:
-          key: v1-node_modules-{{ checksum "functions/yarn.lock" }}
+          key: v1-node_modules-{{ checksum "/functions/yarn.lock" }}
       - run:
           name: Install deps from Nuxt project
           command: cd src && yarn install
@@ -18,9 +18,9 @@ jobs:
           name: Install deps from Firebase Functions project
           command: cd functions && yarn install
       - save_cache:
-          key: v1-node_modules-{{ checksum "src/yarn.lock" }}
+          key: v1-node_modules-{{ checksum "/src/yarn.lock" }}
       - save_cache:
-          key: v1-node_modules-{{ checksum "functions/yarn.lock" }}
+          key: v1-node_modules-{{ checksum "/functions/yarn.lock" }}
       - run:
           name: Build Nuxt project
           command: cd src && yarn build
