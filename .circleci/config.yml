@@ -28,12 +28,11 @@ jobs:
           paths:
             - functions/node_modules
       - run:
+          name: Create folder to testing reports
+          command: mkdir -p ~/reports
+      - run:
           name: Testing the nuxt project
-          command: |
-            cd src
-            yarn -D add ava tap-xunit
-            mkdir -p ~/reports
-            ava --tap | tap-xunit > /reports/ava.xml
+          command: cd src && yarn test
           when: always
       - store_test_results:
           path: ~/reports
