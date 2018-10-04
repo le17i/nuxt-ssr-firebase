@@ -1,17 +1,28 @@
 version: 2
+
+defaults: &defaults
+  working_directory: ~/nuxt-ssr-firebase
+  docker:
+    - image: circleci/node:8.11.2
+
 jobs:
   build:
-    working_directory: ~/nuxt-ssr-firebase
-    docker:
-      - image: circleci/node:8.11.2
-    steps:
+    Checkout code and deps:
       - checkout
+      - run:
+          name: Restore node modules cache from Nuxt project
+          command: v1-node_modules-{{ checksum "src/yarn.lock" }}
+       - run:
+          name: Restore node modules cache Firebase Functions project
+          command: v1-node_modules-{{ checksum "functions/yarn.lock" }}
+    Install deps:
       - run:
           name: Install deps from Nuxt project
           command: cd src && yarn install
       - run:
           name: Install deps from Firebase Functions project
           command: cd functions && yarn install
+    Build the projects:
       - run:
           name: Build Nuxt project
           command: cd src && yarn build
@@ -21,6 +32,21 @@ jobs:
       - run:
           name: Copy files from nuxt folder to public folder
           command: cp -R functions/nuxt/dist/ public
+    Deploy on Firebase Functions and Hosting:
       - run:
           name: Deploy on firebase
           command: cd functions && ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
+workflows:
+  version: 2
+  Build and deploy:
+    jobs:
+      - Checkout code and deps
+      - Install deps:
+          requires:
+            - Checkout code and deps
+      - Build the projects:
+          requires:
+            - Install deps
+      - Deploy on Firebase Functions and Hosting:
+          requires:
+            - Build the projects
