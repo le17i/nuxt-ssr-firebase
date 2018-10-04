@@ -1,33 +1,26 @@
-version: 2
-
-defaults: &defaults
-  working_directory: ~/nuxt-ssr-firebase
-  docker:
-    - image: circleci/node:8.11.2
+version: 2  
 
 jobs:
-  Checkout code and deps:
-    <<: *defaults
+  Building:
+    working_directory: ~/nuxt-ssr-firebase
+    docker:
+      - image: circleci/node:8.11.2
     steps:
       - checkout
-      - run:
-          name: Restore node modules cache from Nuxt project
-          command: v1-node_modules-{{ checksum "src/yarn.lock" }}
-      - run:
-          name: Restore node modules cache Firebase Functions project
-          command: v1-node_modules-{{ checksum "functions/yarn.lock" }}
-  Install deps:
-    <<: *defaults
-    steps:
+      - restore_cache:
+          key: v1-node_modules-{{ checksum "src/yarn.lock" }}
+      - restore_cache:
+          key: v1-node_modules-{{ checksum "functions/yarn.lock" }}
       - run:
           name: Install deps from Nuxt project
           command: cd src && yarn install
       - run:
           name: Install deps from Firebase Functions project
           command: cd functions && yarn install
-  Build the projects:
-    <<: *defaults
-    steps:
+      - save_cache:
+          key: v1-node_modules-{{ checksum "src/yarn.lock" }}
+      - save_cache:
+          key: v1-node_modules-{{ checksum "functions/yarn.lock" }}
       - run:
           name: Build Nuxt project
           command: cd src && yarn build
@@ -38,7 +31,9 @@ jobs:
           name: Copy files from nuxt folder to public folder
           command: cp -R functions/nuxt/dist/ public
   Deploy on Firebase Functions and Hosting:
-    <<: *defaults
+    working_directory: ~/nuxt-ssr-firebase
+    docker:
+      - image: circleci/node:8.11.2
     steps:
       - run:
           name: Deploy on firebase
@@ -47,13 +42,7 @@ workflows:
   version: 2
   Build and deploy:
     jobs:
-      - Checkout code and deps
-      - Install deps:
-          requires:
-            - Checkout code and deps
-      - Build the projects:
-          requires:
-            - Install deps
+      - Building
       - Deploy on Firebase Functions and Hosting:
           requires:
-            - Build the projects
+            - Building
