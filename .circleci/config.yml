@@ -61,3 +61,7 @@ workflows:
       - Deploy on Firebase Functions and Hosting:
           requires:
             - Building
+          filters:
+            branches:
+              only:
+                - master
