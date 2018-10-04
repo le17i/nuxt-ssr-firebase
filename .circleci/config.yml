@@ -1,7 +1,7 @@
 version: 2  
 
 jobs:
-  Building:
+  Checkout, install and test:
     working_directory: ~/nuxt-ssr-firebase
     docker:
       - image: circleci/node:8.11.2
@@ -27,6 +27,19 @@ jobs:
           key: deps-firebase-'{{ checksum "functions/yarn.lock" }}'
           paths:
             - functions/node_modules
+      - run:
+          name: Testing the nuxt project
+          command: cd src && yarn test
+      - save_cache:
+          key: v1-project-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          path: ./
+  Building:
+    working_directory: ~/nuxt-ssr-firebase
+    docker:
+      - image: circleci/node:8.11.2
+    steps:
+      - restore_cache:
+          key: v1-project-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Build Nuxt project
           command: cd src && yarn build
@@ -57,7 +70,14 @@ workflows:
   version: 2
   Build and deploy:
     jobs:
-      - Building
+      - Checkout, install and test
+      - Building:
+          requires:
+            - Checkout, install and test
+          filters:
+            branches:
+              only:
+                - master
       - Deploy on Firebase Functions and Hosting:
           requires:
             - Building
