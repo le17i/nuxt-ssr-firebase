@@ -1,17 +1,53 @@
-version: 2
+version: 2  
+
 jobs:
-  build:
+  Checkout, install and test:
     working_directory: ~/nuxt-ssr-firebase
     docker:
       - image: circleci/node:8.11.2
     steps:
       - checkout
+      - restore_cache:
+          key: deps-nuxt-'{{ checksum "src/yarn.lock" }}'
+          key: deps-nuxt-
+      - restore_cache:
+          key: deps-firebase-'{{ checksum "functions/yarn.lock" }}'
+          key: deps-firebase-
       - run:
           name: Install deps from Nuxt project
           command: cd src && yarn install
       - run:
           name: Install deps from Firebase Functions project
           command: cd functions && yarn install
+      - save_cache:
+          key: deps-nuxt-'{{ checksum "src/yarn.lock" }}'
+          paths:
+            - src/node_modules
+      - save_cache:
+          key: deps-firebase-'{{ checksum "functions/yarn.lock" }}'
+          paths:
+            - functions/node_modules
+      - run:
+          name: Testing the nuxt project
+          command: cd src && yarn test
+      - store_test_results:
+          path: reports
+      - store_artifacts:
+          path: reports
+      - save_cache:
+          key: v1-project-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - functions
+            - src
+            - .firebaserc
+            - firebase.json
+  Building:
+    working_directory: ~/nuxt-ssr-firebase
+    docker:
+      - image: circleci/node:8.11.2
+    steps:
+      - restore_cache:
+          key: v1-project-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Build Nuxt project
           command: cd src && yarn build
@@ -21,6 +57,39 @@ jobs:
       - run:
           name: Copy files from nuxt folder to public folder
           command: cp -R functions/nuxt/dist/ public
+      - save_cache:
+          key: v1-build-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - functions
+            - public
+            - .firebaserc
+            - firebase.json
+  Deploy on Firebase Functions and Hosting:
+    working_directory: ~/nuxt-ssr-firebase
+    docker:
+      - image: circleci/node:8.11.2
+    steps:
+      - restore_cache:
+          key: v1-build-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Deploy on firebase
           command: cd functions && ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
+workflows:
+  version: 2
+  Build and deploy:
+    jobs:
+      - Checkout, install and test
+      - Building:
+          requires:
+            - Checkout, install and test
+          filters:
+            branches:
+              only:
+                - master
+      - Deploy on Firebase Functions and Hosting:
+          requires:
+            - Building
+          filters:
+            branches:
+              only:
+                - master
