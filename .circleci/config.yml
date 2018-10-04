@@ -7,6 +7,7 @@ defaults: &defaults
 
 jobs:
   Checkout code and deps:
+    <<: *defaults
     steps:
       - checkout
       - run:
@@ -16,6 +17,7 @@ jobs:
           name: Restore node modules cache Firebase Functions project
           command: v1-node_modules-{{ checksum "functions/yarn.lock" }}
   Install deps:
+    <<: *defaults
     steps:
       - run:
           name: Install deps from Nuxt project
@@ -24,6 +26,7 @@ jobs:
           name: Install deps from Firebase Functions project
           command: cd functions && yarn install
   Build the projects:
+    <<: *defaults
     steps:
       - run:
           name: Build Nuxt project
@@ -35,6 +38,7 @@ jobs:
           name: Copy files from nuxt folder to public folder
           command: cp -R functions/nuxt/dist/ public
   Deploy on Firebase Functions and Hosting:
+    <<: *defaults
     steps:
       - run:
           name: Deploy on firebase
