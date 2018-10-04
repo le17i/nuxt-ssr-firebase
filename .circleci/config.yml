@@ -32,8 +32,11 @@ jobs:
           command: cd src && yarn test
       - save_cache:
           key: v1-project-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
-          path:
-            - ./
+          paths:
+            - functions
+            - src
+            - .firebaserc
+            - firebase.json
   Building:
     working_directory: ~/nuxt-ssr-firebase
     docker:
