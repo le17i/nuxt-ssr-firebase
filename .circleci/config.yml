@@ -8,9 +8,11 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-node_modules-{{ checksum "/src/yarn.lock" }}
+          key: deps-nuxt-'{{ checksum "src/yarn.lock" }}'
+          key: deps-nuxt-
       - restore_cache:
-          key: v1-node_modules-{{ checksum "/functions/yarn.lock" }}
+          key: deps-firebase-'{{ checksum "functions/yarn.lock" }}'
+          key: deps-firebase-
       - run:
           name: Install deps from Nuxt project
           command: cd src && yarn install
@@ -18,11 +20,11 @@ jobs:
           name: Install deps from Firebase Functions project
           command: cd functions && yarn install
       - save_cache:
-          key: v1-node_modules-{{ checksum "/src/yarn.lock" }}
+          key: deps-nuxt-'{{ checksum "src/yarn.lock" }}'
           paths:
             - src/node_modules
       - save_cache:
-          key: v1-node_modules-{{ checksum "/functions/yarn.lock" }}
+          key: deps-firebase-'{{ checksum "functions/yarn.lock" }}'
           paths:
             - functions/node_modules
       - run:
@@ -34,11 +36,18 @@ jobs:
       - run:
           name: Copy files from nuxt folder to public folder
           command: cp -R functions/nuxt/dist/ public
+      - save_cache:
+          key: v1-build-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - functions
+            - public
   Deploy on Firebase Functions and Hosting:
     working_directory: ~/nuxt-ssr-firebase
     docker:
       - image: circleci/node:8.11.2
     steps:
+      - restore_cache:
+          key: v1-build-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Deploy on firebase
           command: cd functions && ./node_modules/.bin/firebase deploy --token=$FIREBASE_TOKEN
