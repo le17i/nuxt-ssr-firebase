@@ -28,16 +28,12 @@ jobs:
           paths:
             - functions/node_modules
       - run:
-          name: Create folder to testing reports
-          command: mkdir -p ~/reports
-      - run:
           name: Testing the nuxt project
           command: cd src && yarn test
-          when: always
       - store_test_results:
-          path: ~/reports
+          path: reports
       - store_artifacts:
-          path: ~/reports
+          path: reports
       - save_cache:
           key: v1-project-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
           paths:
