@@ -1,7 +1,7 @@
 <template>
   <ul class="list">
     <li v-for="post in posts" :key="post.id">
-      <a :href="link(post.id)">{{ post.title }}</a>
+      <nuxt-link :to="{ name: 'id', params: { id: post.id } }">{{ post.title }}</nuxt-link>
     </li>
   </ul>
 </template>
@@ -11,11 +11,6 @@ export default {
   computed: {
     posts () {
       return this.$store.getters.posts
-    }
-  },
-  methods: {
-    link (id) {
-      return `/${id}`
     }
   }
 }
